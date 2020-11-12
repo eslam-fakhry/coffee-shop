@@ -44,15 +44,63 @@ def get_drinks_datail():
     })
 
 
-'''
-@TODO implement endpoint
-    POST /drinks
-        it should create a new row in the drinks table
-        it should require the 'post:drinks' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
-        or appropriate status code indicating reason for failure
-'''
+def get_validated_drink():
+    data = request.get_json()
+    if not data:
+        raise BadRequestError("No data was provided")
+
+    title = data.get('title', None)
+    if not title:
+        raise MissingFieldError('title')
+
+    recipe = data.get('recipe', None)
+    if not recipe:
+        raise MissingFieldError('recipe')
+
+    if not recipe.get('name', None):
+        raise MissingFieldError('recipe.name')
+
+    if not recipe.get('color', None):
+        raise MissingFieldError('recipe.color')
+
+    if not recipe.get('parts', None):
+        raise MissingFieldError('recipe.parts')
+    return (title, recipe)
+
+
+@app.route("/drinks", methods=["POST"])
+@requires_auth(permission="post:drinks")
+def add_drink():
+    error = False
+    formatted_drink = None
+
+    title, recipe = get_validated_drink()
+    recipe_json = json.dumps([recipe])
+    drink = Drink(
+        title=title,
+        recipe=recipe_json
+    )
+    try:
+        drink.insert()
+        formatted_drink = drink.long()
+    except exc.IntegrityError:
+        raise DuplicatedFieldError('title', title)
+    except Exception:
+        db.session.rollback()
+        error = True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        abort(422)
+
+    drinks = [formatted_drink] if formatted_drink else []
+
+    return jsonify({
+        "success": True,
+        "drinks": drinks
+    })
 
 
 '''
