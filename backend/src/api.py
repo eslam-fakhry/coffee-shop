@@ -1,11 +1,18 @@
 import os
+import sys
 from flask import Flask, request, jsonify, abort
 from sqlalchemy import exc
 import json
 from flask_cors import CORS
 
-from .database.models import db_drop_and_create_all, setup_db, Drink
+from .database.models import db_drop_and_create_all, setup_db, Drink, db
 from .auth.auth import AuthError, requires_auth
+from .errors import (
+    BadRequestError,
+    MissingFieldError,
+    DuplicatedFieldError,
+    HttpError)
+
 
 app = Flask(__name__)
 setup_db(app)
@@ -103,17 +110,49 @@ def add_drink():
     })
 
 
-'''
-@TODO implement endpoint
-    PATCH /drinks/<id>
-        where <id> is the existing model id
-        it should respond with a 404 error if <id> is not found
-        it should update the corresponding row for <id>
-        it should require the 'patch:drinks' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
-        or appropriate status code indicating reason for failure
-'''
+@app.route("/drinks/<int:id>", methods=["PATCH"])
+@requires_auth(permission="patch:drinks")
+def update_drink(id):
+    error = False
+    formatted_drink = None
+
+    data = request.get_json()
+    if not data:
+        raise BadRequestError("No data was provided")
+
+    title = data.get('title', None)
+    recipe = data.get('recipe', None)
+
+    if not title and not recipe:
+        raise MissingFieldError('recipe/title')
+
+    drink = Drink.query.get_or_404(id)
+
+    if title:
+        drink.title = title
+
+    if recipe:
+        drink.recipe = json.dumps(recipe)
+
+    try:
+        drink.update()
+        formatted_drink = drink.long()
+    except exc.IntegrityError:
+        raise DuplicatedFieldError('title', title)
+    except Exception:
+        db.session.rollback()
+        error = True
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        abort(422)
+
+    return jsonify({
+        "success": True,
+        "drinks": [formatted_drink]
+    })
 
 
 '''
