@@ -64,14 +64,15 @@ def get_validated_drink():
     if not recipe:
         raise MissingFieldError('recipe')
 
-    if not recipe.get('name', None):
-        raise MissingFieldError('recipe.name')
+    for index, ingredient in enumerate(recipe, 1):
+        if not ingredient.get('name', None):
+            raise MissingFieldError(f"name of ingredient {index}")
 
-    if not recipe.get('color', None):
-        raise MissingFieldError('recipe.color')
+        if not ingredient.get('color', None):
+            raise MissingFieldError(f"color of ingredient {index}")
 
-    if not recipe.get('parts', None):
-        raise MissingFieldError('recipe.parts')
+        if not ingredient.get('parts', None):
+            raise MissingFieldError(f"parts of ingredient {index}")
     return (title, recipe)
 
 
@@ -82,7 +83,7 @@ def add_drink():
     formatted_drink = None
 
     title, recipe = get_validated_drink()
-    recipe_json = json.dumps([recipe])
+    recipe_json = json.dumps(recipe)
     drink = Drink(
         title=title,
         recipe=recipe_json
