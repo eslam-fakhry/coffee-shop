@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { share } from 'rxjs/operators'
 
 import { AuthService } from './auth.service';
 import { environment } from 'src/environments/environment';
@@ -108,21 +109,24 @@ export class DrinksService {
   }
 
   saveDrink(drink: Drink) {
+
+    let res$ = null
     if (drink.id >= 0) { // patch
-      this.http.patch(this.url + '/drinks/' + drink.id, drink, this.getHeaders())
-      .subscribe( (res: any) => {
-        if (res.success) {
-          this.drinksToItems(res.drinks);
-        }
-      });
+      res$ = this.http.patch(this.url + '/drinks/' + drink.id, drink, this.getHeaders());
     } else { // insert
-      this.http.post(this.url + '/drinks', drink, this.getHeaders())
+      res$ = this.http.post(this.url + '/drinks', drink, this.getHeaders())
+    }
+
+    const shared_res$ = res$.pipe(share())
+
+    shared_res$
       .subscribe( (res: any) => {
         if (res.success) {
           this.drinksToItems(res.drinks);
-        }
+        } 
       });
-    }
+
+    return shared_res$
 
   }
 

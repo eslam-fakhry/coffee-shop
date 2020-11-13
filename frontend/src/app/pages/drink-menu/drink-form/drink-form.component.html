@@ -7,6 +7,10 @@
 
 <ion-content *ngIf="drink">
     <app-drink-graphic [drink]="drink"></app-drink-graphic>
+    <div color="danger" *ngIf="errors" 
+      style="display: flex; justify-content: center; padding-top: 20px; color:#f04141">
+      {{ errors }}  
+      </div>
 
     <form (ngSubmit)="logForm()">
       <ion-item>
