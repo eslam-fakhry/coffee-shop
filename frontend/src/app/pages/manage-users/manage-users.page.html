@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>manage-users</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-list-header> Users </ion-list-header>
+    <ion-item *ngFor="let userId of Object.keys(users.items)">
+      <ion-avatar slot="start">
+        <img
+          [src]="users.items[userId]['picture']"
+        />
+      </ion-avatar>
+      <ion-label>{{ users.items[userId]['email']}}</ion-label>
+      <ion-button slot="end" 
+      [disabled]="!auth.can('manage:baristas')"
+      (click)="openForm(users.items[userId])"> Edit </ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>

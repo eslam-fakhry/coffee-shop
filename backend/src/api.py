@@ -13,6 +13,12 @@ from .errors import (
     DuplicatedFieldError,
     HttpError)
 
+from .management import (
+    add_role_to_user,
+    get_registered_users,
+    get_user_roles,
+    remove_role_from_user,
+    roles_contain)
 
 app = Flask(__name__)
 setup_db(app)
@@ -178,6 +184,74 @@ def delete_drink(id):
         "delete": deleted_id
     })
 
+
+@app.route("/users")
+@requires_auth(permission="manage:baristas")
+def get_users():
+    users = get_registered_users()
+
+    return jsonify({
+        "success": True,
+        "users":  users
+    })
+
+
+@app.route("/users/<user_id>/roles")
+@requires_auth(permission="manage:baristas")
+def user_roles(user_id):
+    roles = get_user_roles(user_id)
+
+    return jsonify({
+        "success": True,
+        "roles": roles
+    })
+
+
+@app.route("/baristas/<user_id>", methods=["PATCH"])
+@requires_auth(permission="manage:baristas")
+def hire_barista(user_id):
+    BARISTA_ROLE_ID = os.getenv("BARISTA_ROLE_ID")
+    to_fire_barista = False
+
+    data = request.get_json()
+    if data:
+        to_fire_barista = bool(data.get('toFireBarista', None))
+
+    existing_roles = get_user_roles(user_id)
+
+    is_already_barista = roles_contain(existing_roles, "barista")
+    is_already_manager = roles_contain(existing_roles, "manager")
+
+    if is_already_manager:
+        raise AuthError({"code": "unauthorized",
+                         "description":
+                         "You can't update managers roles directly "
+                         }, 403)
+
+    elif is_already_barista and not to_fire_barista:
+        return jsonify({
+            "success": True,
+        })
+
+    elif not is_already_barista and to_fire_barista:
+        return jsonify({
+            "success": True,
+        })
+
+    elif is_already_barista and to_fire_barista:
+        res = remove_role_from_user(user_id, BARISTA_ROLE_ID)
+        if res.code != 204 and res.code != 200:
+            abort(422)
+        return jsonify({
+            "success": True,
+        })
+
+    res = add_role_to_user(user_id, BARISTA_ROLE_ID)
+    if res.code != 204 and res.code != 200:
+        abort(422)
+    return jsonify({
+        "success": True,
+    })
 
 # Error Handling
 

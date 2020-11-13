@@ -14,6 +14,7 @@ import { AuthService } from './services/auth.service';
 
 import { HttpClientModule } from '@angular/common/http';
 
+import { UsersService } from './services/users.service';
 import { from } from 'rxjs';
 
 @NgModule({
@@ -29,6 +30,7 @@ import { from } from 'rxjs';
     StatusBar,
     SplashScreen,
     AuthService,
+    UsersService,
     DrinksService,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],

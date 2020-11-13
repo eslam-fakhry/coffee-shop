@@ -9,6 +9,7 @@ const routes: Routes = [
     children: [
       { path: 'drink-menu', loadChildren: '../drink-menu/drink-menu.module#DrinkMenuPageModule' },
       { path: 'user-page', loadChildren: '../user-page/user-page.module#UserPagePageModule' }, 
+      { path: 'manage-users', loadChildren: '../manage-users/manage-users.module#ManageUsersPageModule' },
       {
         path: '',
         redirectTo: '/tabs/drink-menu',

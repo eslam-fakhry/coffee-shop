@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Edit User</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content *ngIf="user">
+  <div
+    color="danger"
+    *ngIf="errors"
+    style="
+      display: flex;
+      justify-content: center;
+      padding-top: 20px;
+      color: #f04141;
+    "
+  >
+    {{ errors }}
+  </div>
+
+  <ion-item>
+    <ion-avatar slot="start">
+      <img [src]="user['picture']" />
+    </ion-avatar>
+    <ion-label>
+      {{ user["email"] }}
+      <ion-badge *ngIf="roles && isBarista()">Barista</ion-badge>
+      <ion-badge *ngIf="roles && isManager()">Manager</ion-badge>
+    </ion-label>
+
+    <ion-button
+      slot="end"
+      [disabled]="!auth.can('manage:baristas')"
+      *ngIf="roles && !isBarista()"
+      (click)="hireBarista()"
+      >Hire</ion-button
+    >
+
+    <ion-button
+      slot="end"
+      *ngIf="roles && isBarista()"
+      (click)="fireBarista()"
+      [disabled]="!auth.can('manage:baristas')"
+      >Fire</ion-button
+    >
+  </ion-item>
+  <ion-button  (click)="closeModal()">Cancel</ion-button>
+</ion-content>
