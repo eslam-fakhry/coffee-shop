@@ -16,13 +16,12 @@ from .errors import (
 
 app = Flask(__name__)
 setup_db(app)
-CORS(app)
 
-'''
-@TODO uncomment the following line to initialize the datbase
-!! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
-!! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
-'''
+FRONTEND_APP_URL = os.getenv('FRONTEND_APP_URL')
+cors = CORS(app, resources={
+    "/*": {"origins": FRONTEND_APP_URL}
+})
+
 # db_drop_and_create_all()
 
 # ROUTES
