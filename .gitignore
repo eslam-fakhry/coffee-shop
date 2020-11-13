@@ -8,3 +8,4 @@ __pycache__
 
 credentials.txt
 .env
+environment.prod.ts
