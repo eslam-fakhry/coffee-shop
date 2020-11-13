@@ -16,6 +16,8 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { UsersService } from './services/users.service';
 import { from } from 'rxjs';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [AppComponent],
@@ -24,7 +26,8 @@ import { from } from 'rxjs';
     BrowserModule,
     IonicModule.forRoot(),
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [
     StatusBar,
