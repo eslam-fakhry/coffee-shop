@@ -28,7 +28,7 @@ cors = CORS(app, resources={
     "/*": {"origins": FRONTEND_APP_URL}
 })
 
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 
