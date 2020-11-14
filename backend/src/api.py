@@ -5,6 +5,8 @@ from sqlalchemy import exc
 import json
 from flask_cors import CORS
 
+from dotenv import load_dotenv
+
 from .database.models import db_drop_and_create_all, setup_db, Drink, db
 from .auth.auth import AuthError, requires_auth
 from .errors import (
@@ -19,6 +21,8 @@ from .management import (
     get_user_roles,
     remove_role_from_user,
     roles_contain)
+
+load_dotenv()
 
 app = Flask(__name__)
 setup_db(app)
